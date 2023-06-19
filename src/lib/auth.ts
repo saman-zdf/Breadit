@@ -69,5 +69,3 @@ export const authOptions: NextAuthOptions = {
 
 // This little helper function will help to have access to our session in entire application.
 export const getAuthSession = () => getServerSession(authOptions);
-
-// TODO: Minute 1:22:48

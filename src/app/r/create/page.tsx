@@ -5,14 +5,18 @@ import { Input } from "@/components/ui/Input";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { CreateSubredditPayload } from "@/lib/validators/subreddit";
 import { create } from "domain";
+import { toast } from "@/hooks/use-toast";
+import { useCustomToast } from "@/hooks/use-custom-toast";
+import { debug } from "console";
 
 const page = () => {
   const [input, setInput] = useState<string>("");
 
   const router = useRouter();
+  const { loginToast } = useCustomToast();
 
   const { mutate: createCommunity, isLoading } = useMutation({
     mutationFn: async () => {
@@ -23,18 +27,45 @@ const page = () => {
       const { data } = await axios.post("/api/subreddit", payload);
       return data as string;
     },
-  });
-  const test = useMutation({
-    mutationFn: async () => {
-      const payload: CreateSubredditPayload = {
-        name: input,
-      };
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 409) {
+          return toast({
+            title: "Subreddit already exist.",
+            description: "Please choose different subreddit name.",
+            variant: "destructive",
+          });
+        }
 
-      const { data } = await axios.post("/api/subreddit", payload);
-      return data as string;
+        if (err.response?.status === 422) {
+          return toast({
+            title: "Invalid subreddit name.",
+            description: "Please choose a name between 3 and 21 characters.",
+            variant: "destructive",
+          });
+        }
+
+        if (err.response?.status === 401) {
+          return loginToast();
+        }
+      }
+
+      toast({
+        title: "There was an error",
+        description: "Could not create subreddit.",
+        variant: "destructive",
+      });
+    },
+
+    onSuccess: (data) => {
+      // TODO: Watched up to 2:58:48 minutes
+      toast({
+        title: "Successfully create subreddit.",
+        variant: "success",
+      });
+      router.push(`/r/${data}`);
     },
   });
-  console.log(test);
 
   return (
     <div className='container flex items-center max-w3xl mx-auto'>
@@ -65,10 +96,9 @@ const page = () => {
 
         <div className='flex justify-end gap-4'>
           <Button variant={"subtle"} onClick={() => router.back()}>
-            Cancel{" "}
+            Cancel
           </Button>
           <Button
-            variant={"subtle"}
             onClick={() => createCommunity()}
             isLoading={isLoading}
             disabled={input.length === 0}

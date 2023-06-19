@@ -14,7 +14,15 @@ function Toaster() {
   const { toasts } = useToast();
 
   return (
-    <ToastProvider duration={4000}>
+    /*
+     * ToastProvider available Props
+     * children?: React.ReactNode;
+     * label?: string;
+     * duration?: number;
+     * swipeDirection?: SwipeDirection;
+     * swipeThreshold?: number;
+     */
+    <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
           <Toast key={id} {...props}>
