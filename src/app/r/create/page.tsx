@@ -7,10 +7,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { CreateSubredditPayload } from "@/lib/validators/subreddit";
-import { create } from "domain";
 import { toast } from "@/hooks/use-toast";
 import { useCustomToast } from "@/hooks/use-custom-toast";
-import { debug } from "console";
 
 const page = () => {
   const [input, setInput] = useState<string>("");
@@ -58,7 +56,6 @@ const page = () => {
     },
 
     onSuccess: (data) => {
-      // TODO: Watched up to 2:58:48 minutes
       toast({
         title: "Successfully create subreddit.",
         variant: "success",
